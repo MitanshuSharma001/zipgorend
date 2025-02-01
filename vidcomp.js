@@ -6,6 +6,8 @@ const multer = require('multer')
 const {v4:uuidv4} = require('uuid')
 const path = require('path')
 const axios = require('axios')
+const date = require('../date.js')
+
 
 
 let uniqueSuffix
@@ -13,10 +15,6 @@ let extension
 let name
 let onlyfilename
 let mime;
-let now = new Date()
-setInterval(()=>{
-  now = new Date()
-},1000)
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/'); 
@@ -28,7 +26,7 @@ const storage = multer.diskStorage({
         mime = file.mimetype
         // onlyfilename = file.fieldname + '-' + uniqueSuffix
         // name = file.fieldname + req.headers['d-custom'] +'-' + uniqueSuffix + extension
-        name = (file.originalname).split('.')[0] +req.headers['d-custom'] + extension
+        name =  date() + (file.originalname).split('.')[0] +'_'+ req.headers['e-mail']+'_'+ extension
         cb(null, name);
     },
 });
@@ -46,7 +44,10 @@ const formdatatomulter = async(req,res)=>{
 const router = express.Router()
 
 router.post('/',async(req,res)=>{
+    const drive = req.drive
+    const socket = req.iosocket
     let ffbyres = 0
+    await socket.emit('filestatus',{status:'Connecting:Cloud-Based File Processing Engine',socket1:req.headers['d-custom'],code:1})
     req.on('data',(chunk)=>{
         ffbyres += chunk.length
         // console.log((ffbyres/req.headers['content-length'])*100);
@@ -54,9 +55,7 @@ router.post('/',async(req,res)=>{
     req.on('end',()=>console.log('FormData Ended'))
     await formdatatomulter(req,res)
     console.log('Uploading Started......');
-    
-    const drive = req.drive
-    const socket = req.iosocket
+    let upbye = 0
     const response = await drive.files.create({
             requestBody: {
                 name:name,
@@ -65,47 +64,57 @@ router.post('/',async(req,res)=>{
             },
             media: {
                 mimeType:mime,
-                body: fs.createReadStream(`uploads/${name}`).on('end',()=>{console.log('.....Uploaded')})
+                body: fs.createReadStream(`uploads/${name}`).on('data',(chunk)=>{ upbye+=chunk.length; console.log((upbye/req.headers['content-length'])*100); }).on('end',()=>{console.log('.....Uploaded')})
             }
         })
-        await socket.emit('uploadedrawgd',{response:response.data,socket:req.headers['d-custom']})
+        fs.unlinkSync(`uploads/${name}`)
+        await socket.emit('vidcomp',{response:response.data,socket:req.headers['d-custom'],size:req.headers['content-length']})
 
         await socket.on('processedgd',async(data)=>{
-            async function webcgenerator(id) {
-                console.log('Generating Content Link....')
-                try {
-                    await drive.permissions.create({
-                        fileId:id,
-                        requestBody:{
-                            role:'reader',
-                            type:'anyone'
-                        }
-                    })
-                    const result = await drive.files.get({
-                        fileId:id,
-                        fields:'webViewLink,webContentLink'
-                    })
-                    console.log('.....Content Link Generated');
-                    // console.log(result.data);
-                    return result.data.webContentLink
-                } catch (error) {
-                    console.log(error.message);
+            if (data.socket1 ==req.headers['d-custom']) {
+                await socket.emit('filestatus',{code:4,socket1:req.headers['d-custom']})
+                async function webcgenerator(id) {
+                    console.log('Generating Content Link....')
+                    try {
+                        await drive.permissions.create({
+                            fileId:id,
+                            requestBody:{
+                                role:'reader',
+                                type:'anyone'
+                            }
+                        })
+                        const result = await drive.files.get({
+                            fileId:id,
+                            fields:'webViewLink,webContentLink'
+                        })
+                        console.log('.....Content Link Generated');
+                        // console.log(result.data);
+                        return result.data.webContentLink
+                    } catch (error) {
+                        console.log(error.message);
+                    }
                 }
-            }
-
-
-            async function downloadfile() {
-                const st = fs.createWriteStream(`came/${data.name}`)
-                console.log('Downloading File from Google Drive.....');
+    
+    
+                async function downloadfile() {
+                    const st = fs.createWriteStream(`came/${data.data.name}`)
+                    console.log('Downloading File from Google Drive.....');
+                    
+                    const response = await axios.get(await webcgenerator(data.data.id),{responseType: 'stream'})
+                    response.data.pipe(st)
+                    st.on('unpipe',async()=>{
+                        console.log('....Downloaded File from Google Drive')
+                        await drive.files.delete({
+                            fileId:data.data.id
+                        })
+                        res.download(`came/${data.data.name}`,`${(data.data.name).slice(6)}`,()=>{
+                            fs.unlinkSync(`came/${data.data.name}`)
+                        })
+                    })
+                }
+                await downloadfile()
                 
-                const response = await axios.get(await webcgenerator(data.id),{responseType: 'stream'})
-                response.data.pipe(st)
-                st.on('unpipe',async()=>{
-                    console.log('....Downloaded File from Google Drive')
-                    res.download(`came/${data.name}`,`${data.name}`)
-                })
             }
-            await downloadfile()
         })
     
     })
