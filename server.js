@@ -19,6 +19,9 @@ app.use(cors({
     methods: ['GET','POST']
 }))
 const socket = io('https://h62jskdt-5000.inc1.devtunnels.ms')
+socket.on('connect',()=>{
+    console.log(`SocketId: ${socket.id}`); 
+})
 //---------GOOGLE OAUTH CONNECTION--------------
 const oauth2 = new google.auth.OAuth2(
     process.env.APNACLIENT_ID,
