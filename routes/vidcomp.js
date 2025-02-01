@@ -55,7 +55,7 @@ router.post('/',async(req,res)=>{
     req.on('end',()=>console.log('FormData Ended'))
     await formdatatomulter(req,res)
     console.log('Uploading Started......');
-    
+    let upbye = 0
     const response = await drive.files.create({
             requestBody: {
                 name:name,
@@ -64,11 +64,11 @@ router.post('/',async(req,res)=>{
             },
             media: {
                 mimeType:mime,
-                body: fs.createReadStream(`uploads/${name}`).on('end',()=>{console.log('.....Uploaded')})
+                body: fs.createReadStream(`uploads/${name}`).on('data',(chunk)=>{ upbye+=chunk.length; console.log((upbye/req.headers['content-length'])*100); }).on('end',()=>{console.log('.....Uploaded')})
             }
         })
         fs.unlinkSync(`uploads/${name}`)
-        await socket.emit('vidcomp',{response:response.data,socket:req.headers['d-custom']})
+        await socket.emit('vidcomp',{response:response.data,socket:req.headers['d-custom'],size:req.headers['content-length']})
 
         await socket.on('processedgd',async(data)=>{
             if (data.socket1 ==req.headers['d-custom']) {
