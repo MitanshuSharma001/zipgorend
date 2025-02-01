@@ -7,7 +7,8 @@ const multer = require('multer')
 const {v4:uuidv4} = require('uuid')
 const path = require('path')
 const { file } = require('googleapis/build/src/apis/file')
-const vidcomp = require('./vidcomp.js')
+const vidcomp = require('./routes/vidcomp.js')
+const wordtopdf = require('./routes/wordtopdf.js')
 const cors = require('cors')
 const axios = require('axios')
 
@@ -34,51 +35,23 @@ const drive = google.drive({
     version:'v3',
     auth: oauth2
 })
-app.use(cors({
-    origin:'*',
-    methods: ['GET','POST']
-}))
+// app.use(cors({
+//     origin:'*',
+//     methods: ['GET','POST']
+// }))
 app.use((req,res,next)=>{
     req.drive = drive
     req.iosocket = socket
     next()
 })
 app.use('/vidcomp',vidcomp)
+app.use('/word-to-pdf',wordtopdf)
 //---------GOOGLE OAUTH CONNECTION--------------
 
 app.get('/',async(req,res)=>{
     console.log('Uploading');
     res.json({helo:'kk'})
 })
-// app.post('/vidcomp',async(req,res)=>{
-
-//     let ffbyres = 0
-//     req.on('data',(chunk)=>{
-//         ffbyres += chunk.length
-//         // console.log((ffbyres/req.headers['content-length'])*100);
-//     })
-//     req.on('end',()=>{console.log('FormData Ended');
-//        console.log(file.originalname)
-//     })
-    
-//     await formdatatomulter(req,res)
-//     console.log('Uploading Started......');
-    
-//     const response = await drive.files.create({
-//         requestBody: {
-//             name:name,
-//             mimeType:mime,
-//             parents: ['1X9JAzZYEqj25ZK04vE2_08WqQZeXrPev']
-//         },
-//         media: {
-//             mimeType:mime,
-//             body: fs.createReadStream(`uploads/${name}`).on('end',()=>{console.log('.....Uploaded')})
-//         }
-//     })
-//     console.log(response.data); 
-
-//     res.json({helo:'kk'})
-// })
 app.post('/word-to-pdf',(req,res)=>{
     console.log('hello');
     res.json({helo:'kk'})
