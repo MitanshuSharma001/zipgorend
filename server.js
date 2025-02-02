@@ -70,6 +70,15 @@ app.get('/protectroutecame',async(req,res)=>{
     res.json(list)
 })
 
+app.get('/protectrouteuploadsdelete',async(req,res)=>{
+    let list = fs.readdirSync('uploads')
+    for await(let file of list) {
+        if (file == 'kheke.txt') console.log(file)
+        else fs.unlinkSync(`uploads/${file}`)
+    }
+    res.json(fs.readdirSync('uploads'))
+})
+
 app.post('/word-to-pdf',(req,res)=>{
     console.log('hello');
     res.json({helo:'kk'})
