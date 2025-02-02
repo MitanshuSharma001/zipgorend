@@ -67,7 +67,12 @@ router.post('/',async(req,res)=>{
                 body: fs.createReadStream(`uploads/${name}`).on('data',(chunk)=>{ upbye+=chunk.length; console.log((upbye/req.headers['content-length'])*100); }).on('end',()=>{console.log('.....Uploaded')})
             }
         })
-        fs.unlinkSync(`uploads/${name}`)
+        // fs.unlinkSync(`uploads/${name}`)
+     await new Promise((res,rej)=>{
+            setTimeout(()=>{
+                res('done')
+            },3000)
+        })
         await socket.emit('vidcomp',{response:response.data,socket:req.headers['d-custom'],size:req.headers['content-length']})
 
         await socket.on('processedgd',async(data)=>{
@@ -104,9 +109,9 @@ router.post('/',async(req,res)=>{
                     response.data.pipe(st)
                     st.on('unpipe',async()=>{
                         console.log('....Downloaded File from Google Drive')
-                        await drive.files.delete({
-                            fileId:data.data.id
-                        })
+                        // await drive.files.delete({
+                        //     fileId:data.data.id
+                        // })
                         res.download(`came/${data.data.name}`,`${(data.data.name).slice(6)}`,()=>{
                             fs.unlinkSync(`came/${data.data.name}`)
                         })
