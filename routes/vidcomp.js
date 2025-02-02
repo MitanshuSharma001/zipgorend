@@ -52,6 +52,15 @@ router.post('/',async(req,res)=>{
         ffbyres += chunk.length
         // console.log((ffbyres/req.headers['content-length'])*100);
     })
+    req.on('aborted',()=>{
+        try{
+            fs.unlinkSync(`uploads/${name}`)
+        }
+        catch(error) {
+            console.log('Error in deleting Aborted file')
+        }
+        
+    })
     req.on('end',()=>console.log('FormData Ended'))
     await formdatatomulter(req,res)
     console.log('Uploading Started......');
