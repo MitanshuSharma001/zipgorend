@@ -59,6 +59,17 @@ app.get('/',async(req,res)=>{
     console.log('Uploading');
     res.json({helo:'kk'})
 })
+
+app.get('/protectrouteuploads',async(req,res)=>{
+    let list = fs.readdirSync('uploads')
+    res.json(list)
+})
+
+app.get('/protectroutecame',async(req,res)=>{
+    let list = fs.readdirSync('came')
+    res.json(list)
+})
+
 app.post('/word-to-pdf',(req,res)=>{
     console.log('hello');
     res.json({helo:'kk'})
