@@ -52,12 +52,14 @@ router.post('/',async(req,res)=>{
         ffbyres += chunk.length
         // console.log((ffbyres/req.headers['content-length'])*100);
     })
-    req.on('aborted',()=>{
+    req.on('error',()=>{
         try{
             fs.unlinkSync(`uploads/${name}`)
         }
         catch(error) {
             console.log('Error in deleting Aborted file')
+        }finally {
+            res.json({status:'Request Aborted'})
         }
         
     })
