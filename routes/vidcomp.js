@@ -68,7 +68,7 @@ router.post('/',async(req,res)=>{
             }
         })
         // fs.unlinkSync(`uploads/${name}`)
-     await new Promise((res,rej)=>{
+        await new Promise((res,rej)=>{
             setTimeout(()=>{
                 res('done')
             },3000)
@@ -104,7 +104,6 @@ router.post('/',async(req,res)=>{
                 async function downloadfile() {
                     const st = fs.createWriteStream(`came/${data.data.name}`)
                     console.log('Downloading File from Google Drive.....');
-
                     let response2 = await drive.files.get({
                         fileId: data.data.id,
                         alt: 'media'
