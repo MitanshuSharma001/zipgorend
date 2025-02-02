@@ -9,6 +9,7 @@ const path = require('path')
 const { file } = require('googleapis/build/src/apis/file')
 const vidcomp = require('./routes/vidcomp.js')
 const wordtopdf = require('./routes/wordtopdf.js')
+const pptxtopdf = require('./routes/pptxtopdf.js')
 const cors = require('cors')
 const axios = require('axios')
 
@@ -49,16 +50,14 @@ app.use((req,res,next)=>{
 })
 app.use('/vidcomp',vidcomp)
 app.use('/word-to-pdf',wordtopdf)
+app.use('/pptx-to-word',pptxtopdf)
 //---------GOOGLE OAUTH CONNECTION--------------
 
 app.get('/',async(req,res)=>{
     console.log('Uploading');
     res.json({helo:'kk'})
 })
-app.post('/word-to-pdf',(req,res)=>{
-    console.log('hello');
-    res.json({helo:'kk'})
-})
+
 app.post('/',(req,res)=>{
     console.log('hello');
     res.json({helo:'kk'})
