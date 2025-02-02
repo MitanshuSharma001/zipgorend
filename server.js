@@ -50,7 +50,7 @@ app.use((req,res,next)=>{
 })
 app.use('/vidcomp',vidcomp)
 app.use('/word-to-pdf',wordtopdf)
-app.use('/pptx-to-word',pptxtopdf)
+app.use('/pptx-to-pdf',pptxtopdf)
 //---------GOOGLE OAUTH CONNECTION--------------
 
 app.get('/',async(req,res)=>{
