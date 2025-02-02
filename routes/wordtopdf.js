@@ -97,8 +97,17 @@ router.post('/',async(req,res)=>{
                 const st = fs.createWriteStream(`came/${data.name}`)
                 console.log('Downloading File from Google Drive.....');
                 
-                const response = await axios.get(await webcgenerator(data.id),{responseType: 'stream'})
-                response.data.pipe(st)
+                let response2 = await drive.files.get({
+                    fileId: data.id,
+                    alt: 'media'
+                },
+                {
+                    responseType: 'stream'
+                }
+            )
+
+                // const response = await axios.get(await webcgenerator(data.id),{responseType: 'stream'})
+                response2.data.pipe(st)
                 st.on('unpipe',async()=>{
                     console.log('....Downloaded File from Google Drive')
                     await drive.files.delete({
