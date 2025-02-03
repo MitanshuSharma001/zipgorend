@@ -106,7 +106,7 @@ router.post('/',async(req,res)=>{
                     // const response = await axios.get(await webcgenerator(data.data.id),{responseType: 'stream'})
                     response2.data.pipe(st)
                     let chunk12=0
-                    st.on('data',(chunk)=>{
+                    response2.data.on('data',(chunk)=>{
                         chunk12+=chunk.length
                         console.log((chunk12/response.data.size)*100)
                     })
