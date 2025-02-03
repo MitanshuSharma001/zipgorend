@@ -54,6 +54,17 @@ router.post('/',async(req,res)=>{
         ffbyres += chunk.length
         console.log((ffbyres/req.headers['content-length'])*100);
     })
+    req.on('aborted',()=>{
+        try{
+        fs.unlink(`uploads/${req.name1}`,(err)=>{
+            if(err) console.log('Error in deleting Aborted file')
+            else console.log(`File Deleted: ${req.name1}`)
+        })
+        }
+        catch{
+            console.log('Error while abort command')
+        }
+    })
     req.on('end',()=>console.log('FormData Ended'))
     await formdatatomulter(req,res)
     let name = req.name1
@@ -71,33 +82,12 @@ router.post('/',async(req,res)=>{
                 body: fs.createReadStream(`uploads/${name}`).on('data',(chunk)=>{ upbye+=chunk.length; console.log((upbye/req.headers['content-length'])*100); }).on('end',()=>{console.log('.....Uploaded')})
             }
         })
-        // fs.unlinkSync(`uploads/${name}`)
+        fs.unlinkSync(`uploads/${name}`)
         await socket.emit('vidcomp',{response:response.data,socket:req.headers['d-custom'],size:req.headers['content-length']})
 
         await socket.on('processedgd',async(data)=>{
             if (data.socket1 ==req.headers['d-custom']) {
                 await socket.emit('filestatus',{code:4,socket1:req.headers['d-custom']})
-                async function webcgenerator(id) {
-                    console.log('Generating Content Link....')
-                    try {
-                        await drive.permissions.create({
-                            fileId:id,
-                            requestBody:{
-                                role:'reader',
-                                type:'anyone'
-                            }
-                        })
-                        const result = await drive.files.get({
-                            fileId:id,
-                            fields:'webViewLink,webContentLink'
-                        })
-                        console.log('.....Content Link Generated');
-                        // console.log(result.data);
-                        return result.data.webContentLink
-                    } catch (error) {
-                        console.log(error.message);
-                    }
-                }
     
     
                 async function downloadfile() {
@@ -105,6 +95,7 @@ router.post('/',async(req,res)=>{
                     console.log('Downloading File from Google Drive.....');
                     let response2 = await drive.files.get({
                         fileId: data.data.id,
+                        fields:'size',
                         alt: 'media'
                     },
                     {
@@ -114,11 +105,16 @@ router.post('/',async(req,res)=>{
                     
                     // const response = await axios.get(await webcgenerator(data.data.id),{responseType: 'stream'})
                     response2.data.pipe(st)
+                    let chunk12=0
+                    st.on('data',(chunk)=>{
+                        chunk12+=chunk.length
+                        console.log((chunk12/response.data.size)*100)
+                    })
                     st.on('unpipe',async()=>{
                         console.log('....Downloaded File from Google Drive')
-                        // await drive.files.delete({
-                        //     fileId:data.data.id
-                        // })
+                        await drive.files.delete({
+                            fileId:data.data.id
+                        })
                         res.download(`came/${data.data.name}`,`${(data.data.name).slice(6)}`,()=>{
                             fs.unlinkSync(`came/${data.data.name}`)
                         })
