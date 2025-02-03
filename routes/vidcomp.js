@@ -10,23 +10,25 @@ const date = require('../date.js')
 
 
 
-let uniqueSuffix
-let extension
-let name
-let onlyfilename
-let mime;
+// let uniqueSuffix
+// let extension
+// let name
+// let onlyfilename
+// let mime;
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/'); 
     },
     filename: (req, file, cb) => {
         // uniqueSuffix = now.toLocaleString().replaceAll(/[:,/]/g,'_').replaceAll(' ','_') + '-' + Math.round(Math.random() * 1E9);
-        extension = path.extname(file.originalname); 
+        let extension = path.extname(file.originalname); 
         console.log(file);
-        mime = file.mimetype
+        req.mime1 = file.mimetype
+        // mime = file.mimetype
         // onlyfilename = file.fieldname + '-' + uniqueSuffix
         // name = file.fieldname + req.headers['d-custom'] +'-' + uniqueSuffix + extension
-        name =  date() + (file.originalname).split('.')[0] +'_'+ req.headers['e-mail']+'_'+ extension
+        let name =  date() + (file.originalname).split('.')[0] +'_'+ req.headers['e-mail']+'_'+ extension
+        req.name1 = name
         cb(null, name);
     },
 });
@@ -65,6 +67,8 @@ router.post('/',async(req,res)=>{
     })
     req.on('end',()=>console.log('FormData Ended'))
     await formdatatomulter(req,res)
+    let name = req.name1
+    let mime = req.mime1
     console.log('Uploading Started......');
     let upbye = 0
     let response = await drive.files.create({
