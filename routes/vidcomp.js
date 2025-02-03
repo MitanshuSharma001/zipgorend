@@ -49,7 +49,7 @@ router.post('/',async(req,res)=>{
     const drive = req.drive
     const socket = req.iosocket
     let ffbyres = 0
-    await socket.emit('filestatus',{status:'Connecting:Cloud-Based File Processing Engine',socket1:req.headers['d-custom'],code:1})
+    await socket.emit('filestatus',{status:'Cloud-Based File Processing Engine Running',socket1:req.headers['d-custom'],code:1})
     req.on('data',(chunk)=>{
         ffbyres += chunk.length
         console.log((ffbyres/req.headers['content-length'])*100);
