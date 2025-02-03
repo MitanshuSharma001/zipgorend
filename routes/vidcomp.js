@@ -52,18 +52,7 @@ router.post('/',async(req,res)=>{
     await socket.emit('filestatus',{status:'Connecting:Cloud-Based File Processing Engine',socket1:req.headers['d-custom'],code:1})
     req.on('data',(chunk)=>{
         ffbyres += chunk.length
-        // console.log((ffbyres/req.headers['content-length'])*100);
-    })
-    req.on('error',()=>{
-        try{
-            fs.unlinkSync(`uploads/${name}`)
-        }
-        catch(error) {
-            console.log('Error in deleting Aborted file')
-        }finally {
-            res.json({status:'Request Aborted'})
-        }
-        
+        console.log((ffbyres/req.headers['content-length'])*100);
     })
     req.on('end',()=>console.log('FormData Ended'))
     await formdatatomulter(req,res)
@@ -83,11 +72,6 @@ router.post('/',async(req,res)=>{
             }
         })
         // fs.unlinkSync(`uploads/${name}`)
-        await new Promise((res,rej)=>{
-            setTimeout(()=>{
-                res('done')
-            },3000)
-        })
         await socket.emit('vidcomp',{response:response.data,socket:req.headers['d-custom'],size:req.headers['content-length']})
 
         await socket.on('processedgd',async(data)=>{
