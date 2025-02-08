@@ -1,90 +1,50 @@
 const {google} = require('googleapis')
 const express = require('express')
-const {io} = require('socket.io-client')
+// const {io} = require('socket.io-client')
 require('dotenv/config')
 const fs = require('fs')
 const multer = require('multer')
 const {v4:uuidv4} = require('uuid')
 const path = require('path')
-const { file } = require('googleapis/build/src/apis/file')
 const vidcomp = require('./routes/vidcomp.js')
 const wordtopdf = require('./routes/wordtopdf.js')
 const pptxtopdf = require('./routes/pptxtopdf.js')
 const xlsxtopdf = require('./routes/xlsxtopdf.js')
+const downloadfile = require('./routes/downloadFile.js')
+const contact = require('./routes/contact.js')
+const retrieve = require('./routes/retrieveenq.js')
+const imagetopdf =  require('./routes/imagetopdf.js')
+const pdftoimage = require('./routes/pdftoimage.js')
 const cors = require('cors')
-const axios = require('axios')
+
 
 const app = express()
-const PORT = 3000
+const PORT = 5000
 app.use(cors({
     origin:'*',
-    methods: ['GET','POST']
+    methods: ['GET','POST'],
+    credentials: true
 }))
-const socket = io('https://h62jskdt-5000.inc1.devtunnels.ms')
-socket.on('connect',()=>{
-    console.log(`SocketId: ${socket.id}`); 
-})
-//---------GOOGLE OAUTH CONNECTION--------------
-const oauth2 = new google.auth.OAuth2(
-    process.env.APNACLIENT_ID,
-    process.env.APNACLIENT_SECRET,
-    process.env.APNAREDIRECT_URI
-)
-try {
-    oauth2.setCredentials({refresh_token: process.env.APNAREFRESH_TOKEN})
-} catch (error) {console.log(error)}
-
-
-
-const drive = google.drive({
-    version:'v3',
-    auth: oauth2
-})
-// app.use(cors({
-//     origin:'*',
-//     methods: ['GET','POST']
-// }))
 app.use((req,res,next)=>{
-    req.drive = drive
-    req.iosocket = socket
+    console.log(req.headers)
+    console.log(req.headers['d-custom']+'-------------');
+    
     next()
 })
+
+app.use(express.json())
 app.use('/vidcomp',vidcomp)
 app.use('/word-to-pdf',wordtopdf)
 app.use('/pptx-to-pdf',pptxtopdf)
 app.use('/xlsx-to-pdf',xlsxtopdf)
-//---------GOOGLE OAUTH CONNECTION--------------
+app.use('/contact',contact)
+app.use('/retrieve',retrieve)
+app.use('/downloadfile',downloadfile)
+app.use('/imagetopdf',imagetopdf)
+app.use('/pdftoimage',pdftoimage)
 
 app.get('/',async(req,res)=>{
-    console.log('Uploading');
-    res.json({helo:'kk'})
-})
-
-app.get('/protectrouteuploads',async(req,res)=>{
-    let list = fs.readdirSync('uploads')
-    res.json(list)
-})
-
-app.get('/protectroutecame',async(req,res)=>{
-    let list = fs.readdirSync('came')
-    res.json(list)
-})
-
-app.get('/protectrouteuploadsdelete',async(req,res)=>{
-    let list = fs.readdirSync('uploads')
-    for await(let file of list) {
-        if (file == 'kheke.txt') console.log(file)
-        else fs.unlinkSync(`uploads/${file}`)
-    }
-    res.json(fs.readdirSync('uploads'))
-})
-
-app.post('/word-to-pdf',(req,res)=>{
-    console.log('hello');
-    res.json({helo:'kk'})
-})
-app.post('/',(req,res)=>{
-    console.log('hello');
+    console.log('Client connected to Render-Backend');
     res.json({helo:'kk'})
 })
 app.listen(PORT,()=>{
