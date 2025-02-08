@@ -21,7 +21,7 @@ const cors = require('cors')
 const app = express()
 const PORT = 5000
 app.use(cors({
-    origin:'*',
+    origin:'https://zipnfile.netlify.app',
     methods: ['GET','POST'],
     credentials: true
 }))
