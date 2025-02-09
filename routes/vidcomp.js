@@ -104,9 +104,13 @@ router.post('/',async(req,res)=>{
                 response2.data.pipe(st)
                 st.on('unpipe',async()=>{
                     console.log('....Downloaded File from Google Drive')
+                    try{
                     await drive.files.delete({
                         fileId:data.data.id
                     })
+                    } catch(error) {
+                        console.log('error')
+                    }
                     await socket.emit('downloadfile',{filename:data.data.name,socketid:data.socket1})
                 })
             }
