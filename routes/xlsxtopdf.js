@@ -82,11 +82,11 @@ router.post('/',async(req,res)=>{
                     response2.data.pipe(st)
                     st.on('finish',async()=>{
                         console.log('....Downloaded File from Google Drive')
-                        res.download(`came/${data.name}`,`${(data.name).slice(6)}`,async()=>{
-                            fs.unlinkSync(`came/${data.name}`)
+                        res.download(`came/${data.data.name}`,`${(data.data.name).slice(6)}`,async()=>{
+                            fs.unlinkSync(`came/${data.data.name}`)
                             try {
                                 await drive.files.delete({
-                                    fileId:data.id
+                                    fileId:data.data.id
                                 })
                             } catch (error) {
                                 console.log(error.message);
