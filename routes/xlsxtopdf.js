@@ -43,7 +43,7 @@ router.post('/',async(req,res)=>{
         ffbyres += chunk.length
         // console.log((ffbyres/req.headers['content-length'])*100);
     })
-    req.on('end',()=>{console.log('FormData Ended');console.log(fs.readdirSync('uploads')})
+    req.on('end',()=>{console.log('FormData Ended');console.log(fs.readdirSync('uploads'))})
     await formdatatomulter(req,res)
     let name = req.name
     let mime = req.mime
