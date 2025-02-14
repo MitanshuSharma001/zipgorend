@@ -54,22 +54,24 @@ router.post('/',async(req,res)=>{
         ffbyres += chunk.length
         console.log((ffbyres/req.headers['content-length'])*100);
     })
-    req.on('aborted',()=>{
-        try{
-        fs.unlink(`uploads/${req.name1}`,(err)=>{
-            if(err) console.log('Error in deleting Aborted file')
-            else console.log(`File Deleted: ${req.name1}`)
-        })
-        }
-        catch{
-            console.log('Error while abort command')
-        }
-    })
+    // req.on('aborted',()=>{
+    //     try{
+    //     fs.unlink(`uploads/${req.name1}`,(err)=>{
+    //         if(err) console.log('Error in deleting Aborted file')
+    //         else console.log(`File Deleted: ${req.name1}`)
+    //     })
+    //     }
+    //     catch{
+    //         console.log('Error while abort command')
+    //     }
+    // })
     req.on('end',()=>console.log('FormData Ended'))
     await formdatatomulter(req,res)
     let name = req.name1
     let mime = req.mime1
     console.log('Uploading Started......');
+    console.log('NAme......',name);
+    console.log('Mime.......',mime);
     let upbye = 0
     let response = await drive.files.create({
             requestBody: {
@@ -104,13 +106,10 @@ router.post('/',async(req,res)=>{
                 response2.data.pipe(st)
                 st.on('unpipe',async()=>{
                     console.log('....Downloaded File from Google Drive')
-                    try{
+                    
                     await drive.files.delete({
                         fileId:data.data.id
                     })
-                    } catch(error) {
-                        console.log('error')
-                    }
                     await socket.emit('downloadfile',{filename:data.data.name,socketid:data.socket1})
                 })
             }
